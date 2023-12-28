@@ -26,8 +26,8 @@ struct bit_writer {
         buffer = buffer.subspan(1);
     }
 
-    constexpr void write(unsigned char b, size_t bits) { // Beccati sto trapezio
-        const size_t available_bits = 8 - bit_offset;
+    constexpr void write(unsigned char b, std::size_t bits) { // Beccati sto trapezio
+        const std::size_t available_bits = 8 - bit_offset;
         if (bits <= available_bits) { // ENTRA???
             buffer[0] |= b << bit_offset;
             skip(bits);
@@ -103,8 +103,8 @@ constexpr inline char translate(char c) {
  * since that's going to be the size that will be stored in
  * the executable.
  */
-constexpr size_t measure(const std::span<const char> in) {
-    size_t bits = 0;
+constexpr std::size_t measure(const std::span<const char> in) {
+    std::size_t bits = 0;
     char prev = 'A';
     for (const auto c : in) {
         const unsigned char translated = translate(c);
@@ -125,11 +125,11 @@ constexpr size_t measure(const std::span<const char> in) {
  * Moreover, `out` must be zeroed before calling this function or
  * the result may be corrupted.
  */
-constexpr size_t compress(const std::span<const char> in, const std::span<unsigned char> out) {
+constexpr std::size_t compress(const std::span<const char> in, const std::span<unsigned char> out) {
     bit_writer writer{out};
 
     char prev = 'A';
-    size_t bits = 0;
+    std::size_t bits = 0;
     for (const auto c : in) {
         const unsigned char translated = translate(c);
         const unsigned char diff = translated ^ prev;
@@ -157,7 +157,7 @@ constexpr struct iter_end_t {
 class decompress_iterator {
     bit_reader reader;
     char current;
-    size_t count;
+    std::size_t count;
 
     constexpr void next() {
         if (count > 0) {
@@ -181,7 +181,7 @@ public:
     using value_type        = char;
 
     constexpr inline decompress_iterator() noexcept {}
-    constexpr inline decompress_iterator(std::span<const unsigned char> data, size_t count) 
+    constexpr inline decompress_iterator(std::span<const unsigned char> data, std::size_t count) 
         : reader{data}, current{'A'}, count{count}
     {
         next();
@@ -213,11 +213,11 @@ public:
 
 struct compressed_string {
     std::span<const unsigned char> data;
-    size_t decompressed_size;
+    std::size_t decompressed_size;
 
     using iterator = decompress_iterator;
 
-    constexpr inline size_t size() const noexcept { return decompressed_size; }
+    constexpr inline std::size_t size() const noexcept { return decompressed_size; }
     constexpr inline iterator begin() const noexcept { return iterator{data, decompressed_size}; }
     constexpr inline auto end() const noexcept { return iter_end; }
 };
@@ -230,7 +230,7 @@ struct constexpr_string {
         std::copy_n(pp, N, data);
     }
 
-    constexpr inline size_t size() const noexcept { return N; }
+    constexpr inline std::size_t size() const noexcept { return N; }
     constexpr inline auto begin() const noexcept { return std::begin(data); }
     constexpr inline auto end() const noexcept { return std::end(data); }
 };
@@ -242,14 +242,14 @@ struct constexpr_compressed_string {
 
     using iterator = decompress_iterator;
 
-    constexpr inline size_t size() const noexcept { return decompressed_size; }
+    constexpr inline std::size_t size() const noexcept { return decompressed_size; }
     constexpr inline iterator begin() const noexcept { return iterator{data, decompressed_size}; }
     constexpr inline auto end() const noexcept { return iter_end; }
 };
 
 template <constexpr_string str>
 constexpr auto make_compressed_string() {
-    constexpr size_t compressed_size = measure(str.data);
+    constexpr std::size_t compressed_size = measure(str.data);
     if constexpr (compressed_size >= str.size()) {
         return str;
     } else {
@@ -266,4 +266,4 @@ constexpr inline auto operator ""_compressed() {
     return make_compressed_string<str>();
 }
 
-}
+} // namespace calco

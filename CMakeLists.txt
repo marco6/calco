@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
+
+set(PACKAGE_NAME      "calco")
+if (NOT DEFINED PACKAGE_VERSION)
+  set(PACKAGE_VERSION   "0.0.1-dev")
+endif()
+set(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+set(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
+set(PACKAGE_BUGREPORT "https://github.com/marco6/calco/issues")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(NOT (CMAKE_BUILD_TYPE OR CMAKE_CONFIGURATION_TYPES OR DEFINED ENV{CFLAGS} OR DEFINED ENV{CXXFLAGS}))
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+project(${PACKAGE_NAME} VERSION 0.0.1 LANGUAGES CXX)
+
+add_library(calco INTERFACE)
+target_include_directories(calco INTERFACE .)
+set_property(TARGET calco PROPERTY CXX_STANDARD 20)
+
+# TODO tests
